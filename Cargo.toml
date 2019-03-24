@@ -1,0 +1,10 @@
+[package]
+name = "loader"
+version = "0.1.0"
+authors = ["Dev <exo.poulpe@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+clap="*"
+sys-info="*"
+cpuid="*"
