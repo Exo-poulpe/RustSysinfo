@@ -1,7 +1,8 @@
 #![crate_type = "bin"]
 
-extern crate sys_info;
-extern crate clap;
+extern crate sys_info;  // Memory info + os info
+extern crate clap;      // Arg parsing
+extern crate raw_cpuid; // Cpu info
 
 use std::convert::*;
 use std::mem;
@@ -10,6 +11,7 @@ use std::io::{self, BufRead, Write};
 
 use sys_info::*;
 use clap::{Arg, App, SubCommand};
+use raw_cpuid::CpuId;
 
 static GB : f32 = 1000000.;
 
@@ -18,20 +20,20 @@ fn main() {
 
 
 let mut app = App::new("RustSysInfo")
-                          .version("1.0.0.0")
-                          .author("Moi")
-                          .about("Does awesome things")
-                          .arg(Arg::with_name("INFO")
+                            .version("0.0.1.0")
+                            .author("Exo-poulpe")
+                            .about("Show system info from rust binarie")
+                            .arg(Arg::with_name("INFO")
                                 .short("i")
                                 .long("info")
-                               .required(false)
-                               .help("Show all info"))
-                          .arg(Arg::with_name("CPU")
-                               .short("c")
-                               .long("cpu")
-                               .required(false)
-                               .help("Show only cpu info"))
-                          .arg(Arg::with_name("MEM")
+                                .required(false)
+                                .help("Show all system info"))
+                            .arg(Arg::with_name("CPU")
+                                .short("c")
+                                .long("cpu")
+                                .required(false)
+                                .help("Show only cpu info"))
+                            .arg(Arg::with_name("MEM")
                                 .short("m")
                                 .long("mem")
                                 .required(false)
@@ -39,13 +41,9 @@ let mut app = App::new("RustSysInfo")
                             .arg(Arg::with_name("OS")
                                 .long("os")
                                 .required(false)
-                                .help("Show os info"));
+                                .help("Show only os info"));
 
     let mut matches = app.clone().get_matches();
-
-
-
-    
 
     if matches.is_present("INFO"){
         println!("{}", CpuInfo() ); 
@@ -72,17 +70,20 @@ fn MemoryInfo() -> String {
 }
 
 fn CpuInfo() -> String {
-    let cpu = sys_info::cpu_speed().unwrap();
+    let cpuid = CpuId::new();
+    let speed = cpuid.get_processor_frequency_info().unwrap();
+    let vendor = cpuid.get_vendor_info().unwrap();
     let cores = sys_info::cpu_num().unwrap();
-    let tmp = format!("Processor cores : {} \nProcessor speed : {:.2} GHZ",cores,(cpu as f32)/(1000 as f32));
+    let brand = cpuid.get_extended_function_info().unwrap();
+    let tmp = format!("Processor : {}\nProcessor cores : {}\n",brand.processor_brand_string().unwrap(),cores);
     let result = String::from(tmp);
     return result;
 }
 
 fn OsInfo() -> String {
-        let os = sys_info::os_type().unwrap();
-        let os_version = sys_info::os_release().unwrap();
-        let tmp = format!("OS  \t\t: {} {}",os,os_version);
-        let result = String::from(tmp);
-        return result;
+    let os = sys_info::os_type().unwrap();
+    let os_version = sys_info::os_release().unwrap();
+    let tmp = format!("OS  \t\t: {} {}",os,os_version);
+    let result = String::from(tmp);
+    return result;
 }

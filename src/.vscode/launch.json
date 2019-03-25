@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Author   : Troller Fabian
+    // Date     : 2019-03-25
+
+    "version": "0.2.1",
+    "configurations": [
+        {
+            "name": "Rust debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "../target/debug/loader.exe",
+            "args": ["-h"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
+        }
+    ]
+}
