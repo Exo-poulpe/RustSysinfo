@@ -120,8 +120,13 @@ fn Options<'a>() -> clap::App<'a,'a> {
                                 .short("o")
                                 .long("os")
                                 .required(false)
-                                .help("Show only os info"));
+                                .help("Show only os info"))
+                            .arg(Arg::with_name("HELP")
+                                .short("h")
+                                .long("help")
+                                .required(false)
+                                .help("Show this message"));
 
-                                return result;
+    return result;
 
 }
