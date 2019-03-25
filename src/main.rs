@@ -20,17 +20,39 @@ struct CPU {
     brand: String,
     cores: i32,
 }
-impl CPU {
-    fn new() -> CPU{
+struct MEM {
+    total:f32,
+    free:f32,
+}
+struct OS {
+    name: String,
+    version: String,
+}
+struct SysInfo {
+    cpu: CPU,
+    mem: MEM,
+    os: OS,
+}
+impl SysInfo {
+    fn new() -> SysInfo {
+        // CPU
         let cpuid = CpuId::new();
         let Strcores = sys_info::cpu_num().unwrap();
         let tmp = cpuid.get_extended_function_info().unwrap();
         let Strbrand = tmp.processor_brand_string().unwrap();
-        CPU {brand:Strbrand.to_string(),cores:(Strcores as i32)}
+
+        // MEM
+        let mem = sys_info::mem_info().unwrap();
+
+        // OS
+        let os_name = sys_info::os_type().unwrap();
+        let os_version = sys_info::os_release().unwrap();
+
+        return SysInfo { cpu:CPU{brand:String::from(Strbrand),cores:(Strcores as i32)},mem:MEM{total:(mem.total as f32),free:(mem.free as f32)},os:OS{name:os_name,version:os_version}, };        
     }
 
     fn to_string(&self) -> String{
-        let tmp = format!("Processor : {}\nProcessor cores : {}\n",self.brand,self.cores);
+        let tmp = format!("Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",self.cpu.brand,self.cpu.cores,self.mem.free/GB,self.mem.total/GB,self.os.name,self.os.version);
         return String::from(tmp);
     }
 }
@@ -40,7 +62,7 @@ fn main() {
 
 
 let mut app = App::new("RustSysInfo")
-                            .version("0.0.1.0")
+                            .version("0.0.1.2")
                             .author("Exo-poulpe")
                             .about("Show system info from rust binarie")
                             .arg(Arg::with_name("INFO")
@@ -65,34 +87,18 @@ let mut app = App::new("RustSysInfo")
 
     let mut matches = app.clone().get_matches();
 
+    let sys = SysInfo::new();
     if matches.is_present("INFO"){
-        println!("{}", CPU::new().to_string() ); 
-        println!("{}", MemoryInfo() );
-        println!("{}", OsInfo() );
+        println!("{}",sys.to_string());
     } else if matches.is_present("CPU") {
-        println!("{}", CPU::new().to_string() );
+        println!("Processor : {}", sys.cpu.brand );
+        println!("Processor cores : {}", sys.cpu.cores );
     } else if matches.is_present("MEM") {
-        println!("{}",MemoryInfo()); 
+        println!("Memory {:.2} GB / {:.2} GB",sys.mem.free/GB,sys.mem.total/GB); 
     } else if matches.is_present("OS") {
-        println!("{}", OsInfo() );
+        println!("OS : {} {}", sys.os.name,sys.os.version);
     } else {
         app.print_help();
     }
 
-}
-
-
-fn MemoryInfo() -> String {
-    let mem = sys_info::mem_info().unwrap();
-    let tmp = format!("Memory  \t: {:.2} GB / {:.2} GB",(mem.free as f32)/GB,(mem.total as f32)/GB);
-    let result = String::from(tmp);
-    return result;
-}
-
-fn OsInfo() -> String {
-    let os = sys_info::os_type().unwrap();
-    let os_version = sys_info::os_release().unwrap();
-    let tmp = format!("OS  \t\t: {} {}",os,os_version);
-    let result = String::from(tmp);
-    return result;
 }
