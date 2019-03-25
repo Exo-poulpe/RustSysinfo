@@ -16,6 +16,26 @@ use raw_cpuid::CpuId;
 static GB : f32 = 1000000.;
 
 
+struct CPU {
+    brand: String,
+    cores: i32,
+}
+impl CPU {
+    fn new() -> CPU{
+        let cpuid = CpuId::new();
+        let Strcores = sys_info::cpu_num().unwrap();
+        let tmp = cpuid.get_extended_function_info().unwrap();
+        let Strbrand = tmp.processor_brand_string().unwrap();
+        CPU {brand:Strbrand.to_string(),cores:(Strcores as i32)}
+    }
+
+    fn to_string(&self) -> String{
+        let tmp = format!("Processor : {}\nProcessor cores : {}\n",self.brand,self.cores);
+        return String::from(tmp);
+    }
+}
+
+
 fn main() {
 
 
@@ -46,11 +66,11 @@ let mut app = App::new("RustSysInfo")
     let mut matches = app.clone().get_matches();
 
     if matches.is_present("INFO"){
-        println!("{}", CpuInfo() ); 
+        println!("{}", CPU::new().to_string() ); 
         println!("{}", MemoryInfo() );
         println!("{}", OsInfo() );
     } else if matches.is_present("CPU") {
-        println!("{}", CpuInfo() ); 
+        println!("{}", CPU::new().to_string() );
     } else if matches.is_present("MEM") {
         println!("{}",MemoryInfo()); 
     } else if matches.is_present("OS") {
@@ -65,17 +85,6 @@ let mut app = App::new("RustSysInfo")
 fn MemoryInfo() -> String {
     let mem = sys_info::mem_info().unwrap();
     let tmp = format!("Memory  \t: {:.2} GB / {:.2} GB",(mem.free as f32)/GB,(mem.total as f32)/GB);
-    let result = String::from(tmp);
-    return result;
-}
-
-fn CpuInfo() -> String {
-    let cpuid = CpuId::new();
-    let speed = cpuid.get_processor_frequency_info().unwrap();
-    let vendor = cpuid.get_vendor_info().unwrap();
-    let cores = sys_info::cpu_num().unwrap();
-    let brand = cpuid.get_extended_function_info().unwrap();
-    let tmp = format!("Processor : {}\nProcessor cores : {}\n",brand.processor_brand_string().unwrap(),cores);
     let result = String::from(tmp);
     return result;
 }
