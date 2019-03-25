@@ -12,7 +12,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "../target/debug/loader.exe",
-            "args": ["-h"],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

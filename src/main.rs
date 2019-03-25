@@ -48,11 +48,16 @@ impl SysInfo {
         let os_name = sys_info::os_type().unwrap();
         let os_version = sys_info::os_release().unwrap();
 
-        return SysInfo { cpu:CPU{brand:String::from(Strbrand),cores:(Strcores as i32)},mem:MEM{total:(mem.total as f32),free:(mem.free as f32)},os:OS{name:os_name,version:os_version}, };        
+        return SysInfo { 
+            cpu:CPU{brand:String::from(Strbrand),cores:(Strcores as i32)},
+            mem:MEM{total:(mem.total as f32),free:(mem.free as f32)},
+            os:OS{name:os_name,version:os_version},
+        };        
     }
 
     fn to_string(&self) -> String{
-        let tmp = format!("Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",self.cpu.brand,self.cpu.cores,self.mem.free/GB,self.mem.total/GB,self.os.name,self.os.version);
+        let tmp = format!("Processor {}\nProcessor cores : {}\nMemory : {:.2} GB / {:.2} GB\nOS : {} {}",
+            self.cpu.brand,self.cpu.cores,self.mem.free/GB,self.mem.total/GB,self.os.name,self.os.version);
         return String::from(tmp);
     }
 }
@@ -60,9 +65,40 @@ impl SysInfo {
 
 fn main() {
 
+    let mut app = Options();
 
-let mut app = App::new("RustSysInfo")
-                            .version("0.0.1.2")
+    let mut matches = app.clone().get_matches();
+
+    let sys = SysInfo::new();
+
+    if matches.is_present("INFO"){
+
+        println!("{}",sys.to_string());
+
+    } else if matches.is_present("CPU") {
+
+        println!("Processor : {}", sys.cpu.brand );
+        println!("Processor cores : {}", sys.cpu.cores );
+
+    } else if matches.is_present("MEM") {
+
+        println!("Memory {:.2} GB / {:.2} GB",sys.mem.free/GB,sys.mem.total/GB); 
+
+    } else if matches.is_present("OS") {
+
+        println!("OS : {} {}", sys.os.name,sys.os.version);
+
+    } else {
+
+        app.print_help();
+
+    }
+
+}
+
+fn Options<'a>() -> clap::App<'a,'a> {
+    let result = App::new("RustSysInfo")
+                            .version("0.0.1.3")
                             .author("Exo-poulpe")
                             .about("Show system info from rust binarie")
                             .arg(Arg::with_name("INFO")
@@ -81,24 +117,11 @@ let mut app = App::new("RustSysInfo")
                                 .required(false)
                                 .help("Show only memory info"))
                             .arg(Arg::with_name("OS")
+                                .short("o")
                                 .long("os")
                                 .required(false)
                                 .help("Show only os info"));
 
-    let mut matches = app.clone().get_matches();
-
-    let sys = SysInfo::new();
-    if matches.is_present("INFO"){
-        println!("{}",sys.to_string());
-    } else if matches.is_present("CPU") {
-        println!("Processor : {}", sys.cpu.brand );
-        println!("Processor cores : {}", sys.cpu.cores );
-    } else if matches.is_present("MEM") {
-        println!("Memory {:.2} GB / {:.2} GB",sys.mem.free/GB,sys.mem.total/GB); 
-    } else if matches.is_present("OS") {
-        println!("OS : {} {}", sys.os.name,sys.os.version);
-    } else {
-        app.print_help();
-    }
+                                return result;
 
 }
